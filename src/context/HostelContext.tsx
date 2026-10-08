@@ -25,13 +25,7 @@ import {
   mockEvents,
   mockNotifications,
 } from '../data/mockData';
-import { supabase } from '../lib/supabase';
-
-// ─── Check if Supabase is actually configured ─────────────────────────────────
-const isSupabaseConfigured = (): boolean => {
-  const url = import.meta.env.VITE_SUPABASE_URL as string;
-  return Boolean(url && !url.includes('your-project-id'));
-};
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 // ─── Context types ────────────────────────────────────────────────────────────
 interface QRVerificationResult {

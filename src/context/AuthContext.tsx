@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminUser, Role } from '../types';
 import { mockCurrentUser } from '../data/mockData';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface AuthContextType {
   user: AdminUser | null;
@@ -77,8 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Sync with Supabase session on mount ──────────────────────────────────
   useEffect(() => {
     // Check if Supabase is configured
-    const url = import.meta.env.VITE_SUPABASE_URL as string;
-    if (!url || url.includes('your-project-id')) return; // Not configured yet
+    if (!isSupabaseConfigured()) return; // Not configured yet
 
     // Restore session from Supabase
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -133,11 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Try Supabase auth first
-    const supabaseConfigured =
-      import.meta.env.VITE_SUPABASE_URL &&
-      !(import.meta.env.VITE_SUPABASE_URL as string).includes('your-project-id');
-
-    if (supabaseConfigured) {
+    if (isSupabaseConfigured()) {
       // adminId is treated as the email for Supabase auth
       const email = adminId.includes('@') ? adminId : `${adminId}@gec.edu.in`;
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -170,11 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── logout ────────────────────────────────────────────────────────────────
   const logout = async () => {
-    const supabaseConfigured =
-      import.meta.env.VITE_SUPABASE_URL &&
-      !(import.meta.env.VITE_SUPABASE_URL as string).includes('your-project-id');
-
-    if (supabaseConfigured) {
+    if (isSupabaseConfigured()) {
       await supabase.auth.signOut();
       // onAuthStateChange will set user to null
     } else {
